@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar, { Section } from './components/Sidebar.tsx';
 import InspirationBoard from './components/InspirationBoard.tsx';
 import ProjectTracker from './components/ProjectTracker.tsx';
@@ -17,14 +17,46 @@ import Settings from './components/Settings.tsx';
 import { AuthProvider, useAuth } from './contexts/AuthContext.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from './lib/firebase';
+import OnboardingWizard from './components/OnboardingWizard.tsx';
 
 function AppContent() {
   const { user, loading } = useAuth();
   const [showDashboard, setShowDashboard] = useState(false);
   const [activeSection, setActiveSection] = useState<Section>('inspiration');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
-  if (loading) {
+  useEffect(() => {
+    let isMounted = true;
+    const checkOnboarding = async () => {
+      if (!user) {
+        if (isMounted) setCheckingOnboarding(false);
+        return;
+      }
+      try {
+        const profileDoc = await getDoc(doc(db, "users", user.uid, "profile"));
+        if (profileDoc.exists() && profileDoc.data().onboardingComplete) {
+          if (isMounted) setShowOnboarding(false);
+        } else {
+          if (isMounted) setShowOnboarding(true);
+        }
+      } catch (err) {
+        console.error("Failed to check onboarding status", err);
+        if (isMounted) setShowOnboarding(false);
+      } finally {
+        if (isMounted) setCheckingOnboarding(false);
+      }
+    };
+    checkOnboarding();
+    
+    return () => { isMounted = false; };
+  }, [user]);
+
+  if (loading || checkingOnboarding) {
     return (
       <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center">
         <motion.img 
@@ -87,7 +119,9 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-bg-dark text-gray-400 selection:bg-white/10 selection:text-white font-sans overflow-x-hidden">
       <AnimatePresence mode="wait">
-        {!showDashboard ? (
+        {showOnboarding ? (
+          <OnboardingWizard key="onboarding" onComplete={() => setShowOnboarding(false)} />
+        ) : !showDashboard ? (
           <motion.div
             key="landing"
             initial={{ opacity: 1 }}
