@@ -11,6 +11,7 @@ import CreativeAssistant from './components/CreativeAssistant.tsx';
 import ContentCalendar from './components/ContentCalendar.tsx';
 import IdeaHistory from './components/IdeaHistory.tsx';
 import Analytics from './components/Analytics.tsx';
+import ContentTemplates from './components/ContentTemplates.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import LoginPage from './components/LoginPage.tsx';
 import Settings from './components/Settings.tsx';
@@ -38,7 +39,7 @@ function AppContent() {
         return;
       }
       try {
-        const profileDoc = await getDoc(doc(db, "users", user.uid, "profile"));
+        const profileDoc = await getDoc(doc(db, "users", user.uid));
         if (profileDoc.exists() && profileDoc.data().onboardingComplete) {
           if (isMounted) setShowOnboarding(false);
         } else {
@@ -107,6 +108,8 @@ function AppContent() {
         return <ContentCalendar />;
       case 'analytics':
         return <Analytics />;
+      case 'templates':
+        return <ContentTemplates />;
       case 'assistant':
         return <CreativeAssistant />;
       case 'settings':

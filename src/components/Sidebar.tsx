@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Sparkles, MessageCircle, Kanban, Settings, Calendar, History, BarChart2, X, LogOut } from 'lucide-react';
+import { Sparkles, MessageCircle, Kanban, Settings, Calendar, History, BarChart2, X, LogOut, LayoutTemplate } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../contexts/AuthContext';
 
-export type Section = 'inspiration' | 'projects' | 'history' | 'calendar' | 'assistant' | 'analytics' | 'settings';
+export type Section = 'inspiration' | 'templates' | 'projects' | 'history' | 'calendar' | 'assistant' | 'analytics' | 'settings';
 
 interface SidebarProps {
   activeSection: Section;
@@ -19,6 +19,7 @@ export default function Sidebar({ activeSection, onSectionChange, isOpen, onClos
   
   const menuItems = [
     { id: 'inspiration' as Section, label: 'Ide Konten', icon: Sparkles },
+    { id: 'templates' as Section, label: 'Template', icon: LayoutTemplate },
     { id: 'history' as Section, label: 'Riwayat Ide', icon: History },
     { id: 'projects' as Section, label: 'Projek Ku', icon: Kanban },
     { id: 'calendar' as Section, label: 'Kalender Konten', icon: Calendar },
